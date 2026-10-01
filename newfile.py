@@ -2,86 +2,75 @@ import sys
 import json
 import random
 import string
-import os
 
-DB_FILE = "urls.json"
+FILE_NAME = "urls.json"
 
 def load_urls():
-    if not os.path.exists(DB_FILE):
-        return {}
-    with open(DB_FILE, "r") as f:
-        try:
+    try:
+        with open(FILE_NAME, "r") as f:
             return json.load(f)
-        except json.JSONDecodeError:
-            return {}
+    except FileNotFoundError:
+        return {}
 
 def save_urls(data):
-    with open(DB_FILE, "w") as f:
+    with open(FILE_NAME, "w") as f:
         json.dump(data, f, indent=4)
 
 def generate_short_code(length=6):
-    chars = string.ascii_letters + string.digits
-    return "".join(random.choice(chars) for _ in range(length))
+    return ''.join(random.choices(string.ascii_letters + string.digits, k=length))
 
-def shorten_url(original_url):
-    urls = load_urls()
-    for code, url in urls.items():
-        if url == original_url:
-            print(f"Short code already exists: {code}")
-            return code
+def shorten(url, custom_code=None):
+    data = load_urls()
     
-    code = generate_short_code()
-    while code in urls:
-        code = generate_short_code()
-        
-    urls[code] = original_url
-    save_urls(urls)
-    print(f"Short code: {code}")
-    return code
-
-def resolve_url(short_code):
-    urls = load_urls()
-    if short_code in urls:
-        print(f"Original URL: {urls[short_code]}")
-        return urls[short_code]
+    # Check if the custom code is provided and if it's taken
+    if custom_code:
+        if custom_code in data:
+            print(f"Error: Short code already exists: {custom_code}")
+            return
+        code = custom_code
     else:
-        print("Short code not found.")
-        return None
+        # Generate a unique random code
+        code = generate_short_code()
+        while code in data:
+            code = generate_short_code()
+            
+    data[code] = url
+    save_urls(data)
+    print(f"Shortened URL: {code} -> {url}")
 
 def list_urls():
-    urls = load_urls()
-    if not urls:
-        print("No short URLs found.")
-        return
+    data = load_urls()
     print("--- Saved Short Links ---")
-    for code, url in urls.items():
+    for code, url in data.items():
         print(f"{code} -> {url}")
 
-def main():
-    if len(sys.argv) < 2:
-        print("Usage: python main.py [shorten|resolve|list] <url_or_code>")
-        return
-
-    cmd = sys.argv[1].lower()
-
-    if cmd == "shorten":
-        if len(sys.argv) < 3:
-            print("Please provide a URL to shorten.")
-            return
-        shorten_url(sys.argv[2])
-
-    elif cmd == "resolve":
-        if len(sys.argv) < 3:
-            print("Please provide a short code.")
-            return
-        resolve_url(sys.argv[2])
-
-    elif cmd == "list":
-        list_urls()
-
+def resolve(code):
+    data = load_urls()
+    if code in data:
+        print(f"Original URL: {data[code]}")
     else:
-        print("Invalid command.")
+        print("Error: Short code not found.")
 
 if __name__ == "__main__":
-    main()
- 
+    if len(sys.argv) < 2:
+        print("Usage: python newfile.py <shorten|list|resolve> [args]")
+        sys.exit(1)
+
+    command = sys.argv[1]
+
+    if command == "shorten":
+        if len(sys.argv) < 3:
+            print("Usage: python newfile.py shorten <url> [custom_code]")
+        else:
+            url = sys.argv[2]
+            custom_code = sys.argv[3] if len(sys.argv) > 3 else None
+            shorten(url, custom_code)
+
+    elif command == "list":
+        list_urls()
+
+    elif command == "resolve":
+        if len(sys.argv) < 3:
+            print("Usage: python newfile.py resolve <code>")
+        else:
+            resolve(sys.argv[2])
