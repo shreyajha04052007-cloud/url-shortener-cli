@@ -21,10 +21,15 @@ What It Does
 
 
 File Structure
+
 ├── main.py          # Main CLI application
+
 ├── urls.json        # Saved link mappings
+
 ├── app.log          # Runtime activity logs
+
 └── README.md        # Project documentation
+
 
 
 How to Run
