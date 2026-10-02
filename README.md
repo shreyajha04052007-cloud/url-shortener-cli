@@ -22,13 +22,13 @@ What It Does
 
 File Structure
 
-├── main.py                 # Main CLI application
+├── main.py      ______      # Main CLI application
 
-├── urls.json               # Saved link mappings
+├── urls.json    ______     # Saved link mappings
 
-├── app.log                 # Runtime activity logs
+├── app.log      ______     # Runtime activity logs
 
-└── README.md               # Project documentation
+└── README.md    ______      # Project documentation
 
 
 
