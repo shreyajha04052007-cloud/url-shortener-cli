@@ -65,5 +65,7 @@ Project Structure
 cli-url-shortener/
 
 ├── main.py  ___       # Core CLI application logic
+
 ├── urls.json ___      # Data store for shortened URLs and click metrics
+
 └── README.md  ___     # Project documentation
