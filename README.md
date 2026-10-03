@@ -30,6 +30,7 @@ Key Features
 Tech Stack
 
 1)Language: Python 3.8+
+
 2)Standard Libraries: hashlib, json, os, re, urllib.parse, webbrowser, datetime
 
 
