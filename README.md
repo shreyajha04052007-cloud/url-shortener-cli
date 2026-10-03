@@ -48,10 +48,15 @@ CLI Menu Options
 
 === CLI URL SHORTENER ===
 1)Shorten URL (Standard Hash)
+
 2)Shorten URL (Smart Keyword Alias)
+
 3)Shorten URL (Custom Alias)
+
 4)Access Link (Redirect & Open Browser)
+
 5)View & Search Saved Links / Analytics
+
 6)Exit
 
 
