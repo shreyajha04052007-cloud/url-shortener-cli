@@ -63,6 +63,7 @@ CLI Menu Options
 Project Structure
 
 cli-url-shortener/
-├── main.py          # Core CLI application logic
-├── urls.json        # Data store for shortened URLs and click metrics
-└── README.md        # Project documentation
+
+├── main.py  ___       # Core CLI application logic
+├── urls.json ___      # Data store for shortened URLs and click metrics
+└── README.md  ___     # Project documentation
