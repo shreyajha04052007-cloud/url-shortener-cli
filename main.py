@@ -2,7 +2,6 @@ import hashlib
 import json
 import os
 import re
-import sys
 import urllib.parse
 import webbrowser
 from datetime import datetime, timedelta
@@ -34,14 +33,13 @@ def save_data(data):
 
 
 def generate_short_code(url: str, data: dict, length: int = 6) -> str:
-    """Generates a short hash code and safely handles hash collisions."""
+    """Generates a short hash code and safely handles collisions."""
     counter = 0
     while True:
-        # Counter change hone par seed badal jata hai, jisse har baar unique hash milega
         seed = f"{url}_{counter}" if counter > 0 else url
         candidate = hashlib.sha256(seed.encode()).hexdigest()[:length]
         
-        # Collision Check: Duplicate key pe new hash try karega
+        # Collision Check
         if candidate not in data:
             return candidate
         elif data[candidate]["url"] == url:
@@ -51,7 +49,7 @@ def generate_short_code(url: str, data: dict, length: int = 6) -> str:
 
 
 def generate_smart_alias(url: str, data: dict) -> str:
-    """Extracts meaningful domain/path keywords and handles collisions."""
+    """Extracts domain/path keywords and handles collisions cleanly."""
     parsed = urllib.parse.urlparse(url)
     domain = parsed.netloc.replace("www.", "").split(".")[0]
     path_parts = [p for p in parsed.path.split("/") if p]
@@ -61,7 +59,6 @@ def generate_smart_alias(url: str, data: dict) -> str:
     
     alias = base_alias
     counter = 1
-    # Collision Handling for Smart Alias
     while alias in data:
         if data[alias]["url"] == url:
             return alias
@@ -86,7 +83,6 @@ def shorten_url(original_url: str, mode: str, custom_alias: str = None, days_val
     elif mode == "smart":
         short_code = generate_smart_alias(formatted_url, data)
     else:
-        # Standard Hash with Collision Logic
         short_code = generate_short_code(formatted_url, data)
     
     expires_at = None
@@ -134,16 +130,24 @@ def redirect_url(short_code: str):
         print(f"[-] Could not open browser automatically: {e}")
 
 
-def view_analytics():
+def view_and_search_analytics():
     data = load_data()
     if not data:
         print("\n[-] No stored links found.")
         return
     
-    print("\n--- Analytics & Stored Links ---")
+    query = input("\nEnter search term (or press Enter to view all): ").strip().lower()
+    
+    print("\n--- Saved Links & Analytics ---")
+    found = False
     for code, info in data.items():
-        exp_str = info.get("expires_at") or "Never"
-        print(f"Code: {code:<15} | Clicks: {info['clicks']:<3} | Expires: {exp_str:<19} | Target: {info['url']}")
+        if not query or query in code.lower() or query in info['url'].lower():
+            exp_str = info.get("expires_at") or "Never"
+            print(f"Code: {code:<15} | Clicks: {info['clicks']:<3} | Expires: {exp_str:<19} | Target: {info['url']}")
+            found = True
+            
+    if not found:
+        print("[-] No matching links found.")
 
 
 def main():
@@ -152,8 +156,8 @@ def main():
         print("1. Shorten URL (Standard Hash)")
         print("2. Shorten URL (Smart Keyword Alias)")
         print("3. Shorten URL (Custom Alias)")
-        print("4. Access Link (Redirect & Track Clicks)")
-        print("5. View Analytics & Saved Links")
+        print("4. Access Link (Redirect & Open Browser)")
+        print("5. View & Search Saved Links / Analytics")
         print("6. Exit")
         
         choice = input("\nEnter choice (1-6): ").strip()
@@ -169,12 +173,14 @@ def main():
         elif choice == "3":
             url = input("Enter target URL: ").strip()
             alias = input("Enter custom alias: ").strip()
-            shorten_url(url, mode="custom", custom_alias=alias)
+            exp_input = input("Enter validity in days (press Enter for no expiry): ").strip()
+            days = int(exp_input) if exp_input.isdigit() else None
+            shorten_url(url, mode="custom", custom_alias=alias, days_valid=days)
         elif choice == "4":
             code = input("Enter short code: ").strip()
             redirect_url(code)
         elif choice == "5":
-            view_analytics()
+            view_and_search_analytics()
         elif choice == "6":
             print("Exiting application...")
             break
